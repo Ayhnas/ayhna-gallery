@@ -7,8 +7,8 @@ url=sys.argv[1] if len(sys.argv)>1 else 'http://127.0.0.1:8877'
 with httpx.Client(base_url=url,headers={'X-Gallery-UI':'1','Origin':url},timeout=20) as client:
     for attempt in range(60):
         try:
-            if client.get('/health').is_success:break
-        except httpx.ConnectError:pass
+            if client.get('/health',timeout=2).is_success:break
+        except httpx.TransportError:pass
         time.sleep(.5)
     else:raise RuntimeError('Image did not start')
     assert 'NAS 서버를 시작' in client.get('/').text
