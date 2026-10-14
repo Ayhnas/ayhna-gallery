@@ -1,0 +1,41 @@
+name: ayhna-gallery
+services:
+  gallery:
+    image: ghcr.io/ayhnas/ayhna-gallery:0.2.0
+    container_name: ayhna-gallery
+    user: "10001:10001"
+    restart: unless-stopped
+    ports:
+      - "8787:8787/tcp"
+    volumes:
+      - type: bind
+        source: /DATA/AppData/ayhna-gallery
+        target: /data
+    network_mode: bridge
+    labels:
+      icon: https://raw.githubusercontent.com/Ayhnas/ayhna-gallery/main/assets/icon.svg
+    x-casaos:
+      ports:
+        - container: "8787"
+          description:
+            en_us: NAS web settings and client API
+      volumes:
+        - container: /data
+          description:
+            en_us: Thumbnail, metadata and settings storage
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  author: Ayhnas
+  category: Gallery
+  icon: https://raw.githubusercontent.com/Ayhnas/ayhna-gallery/main/assets/icon.svg
+  index: /
+  main: gallery
+  port_map: "8787"
+  scheme: http
+  hostname: 192.168.1.88
+  title:
+    en_us: AyhnaGallery
+  description:
+    en_us: Private device photo gallery. Thumbnails and metadata stay on the NAS; originals are relayed on request.
