@@ -69,6 +69,7 @@ jobs:
               exit 1
             fi
             docker rm -f ayhna-gallery-smoke
+            docker image rm "$HOSTED_IMAGE"
           done
       - name: Generate installable Compose
         env:
