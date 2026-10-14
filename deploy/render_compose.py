@@ -12,9 +12,6 @@ def render(image):
     image: {json.dumps(image)}
     ports:
       - "8787:8787"
-    environment:
-      # Set your own pairing code here before starting the project.
-      GALLERY_PAIR_SECRET: ""
     volumes:
       - gallery-data:/data
     restart: unless-stopped
