@@ -1,0 +1,13 @@
+services:
+  gallery:
+    image: "ghcr.io/ayhnas/ayhna-gallery@sha256:1a2d92ec0361286140a86e5d0c0d2f54e06d2be606d9c17b45540d0d2db4b81a"
+    ports:
+      - "8787:8787"
+    environment:
+      # Set your own pairing code here before starting the project.
+      GALLERY_PAIR_SECRET: ""
+    volumes:
+      - gallery-data:/data
+    restart: unless-stopped
+volumes:
+  gallery-data:
