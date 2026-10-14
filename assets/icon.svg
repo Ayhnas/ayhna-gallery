@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8374ff"/><stop offset="1" stop-color="#385bdd"/></linearGradient><linearGradient id="mount" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#68dddc"/><stop offset="1" stop-color="#b0f0ea"/></linearGradient></defs>
+<rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bg)"/>
+<rect x="91" y="109" width="310" height="274" rx="34" transform="rotate(-12 246 246)" fill="#d6d6ff" opacity=".45"/>
+<rect x="105" y="122" width="310" height="274" rx="34" transform="rotate(7 260 259)" fill="#eeeeff" opacity=".78"/>
+<rect x="101" y="130" width="310" height="264" rx="32" fill="#fff"/>
+<rect x="123" y="152" width="266" height="220" rx="18" fill="#25275b"/>
+<circle cx="319" cy="204" r="25" fill="#ffc97a"/>
+<path d="M123 327 203 233Q210 224 219 233L278 299 310 266Q317 258 325 267L389 334V354Q389 372 371 372H141Q123 372 123 354Z" fill="url(#mount)"/>
+<path d="M123 340 178 286 248 372H141Q123 372 123 354Z" fill="#57bbcd"/>
+</svg>
