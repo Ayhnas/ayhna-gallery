@@ -1,0 +1,68 @@
+name: Publish NAS image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+    paths: ['server/**', 'deploy/**', '.github/workflows/publish-nas.yml']
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: nas-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Test server protocol
+        run: |
+          python -m pip install -r server/requirements.txt
+          python server/test_server.py
+      - name: Resolve image address
+        id: image
+        shell: bash
+        run: |
+          echo "name=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/ayhna-gallery" >> "$GITHUB_OUTPUT"
+          version="$(python -c 'import ast; t=ast.parse(open("server/app.py", encoding="utf-8").read()); print(next(ast.literal_eval(k.value) for n in ast.walk(t) if isinstance(n,ast.Call) and isinstance(n.func,ast.Name) and n.func.id=="FastAPI" for k in n.keywords if k.arg=="version"))')"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and host NAS image
+        id: build
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: ./server
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ steps.image.outputs.name }}:latest
+            ${{ steps.image.outputs.name }}:${{ steps.image.outputs.version }}
+            ${{ steps.image.outputs.name }}:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Generate installable Compose
+        env:
+          HOSTED_IMAGE: ${{ steps.image.outputs.name }}@${{ steps.build.outputs.digest }}
+        run: python deploy/render_compose.py "$HOSTED_IMAGE" --output nas-install/compose.yaml
+      - name: Save installation file
+        uses: actions/upload-artifact@v4
+        with:
+          name: AyhnaGallery-NAS-install
+          path: nas-install/compose.yaml
+          if-no-files-found: error
