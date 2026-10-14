@@ -19,7 +19,6 @@ from pydantic import BaseModel, Field
 
 DATA = Path(os.environ.get('GALLERY_DATA', './data'))
 DATA.mkdir(parents=True, exist_ok=True)
-PAIR_SECRET = os.environ.get('GALLERY_PAIR_SECRET', '')
 MAX_ORIGINAL = 256 * 1024 * 1024
 
 @contextmanager
@@ -85,7 +84,9 @@ async def lifespan(app):
     for relay in relays.values():
         relay.closed.set()
 
-app = FastAPI(title='AyhnaGallery', version='0.1.0', lifespan=lifespan)
+app = FastAPI(title='AyhnaGallery', version='0.2.0', lifespan=lifespan)
+from admin import install_admin
+password_matches = install_admin(app, db)
 
 class Pair(BaseModel):
     secret: str
@@ -97,8 +98,8 @@ def health():
 
 @app.post('/pair')
 def pair(body: Pair):
-    if not PAIR_SECRET or not secrets.compare_digest(body.secret, PAIR_SECRET):
-        raise HTTPException(403, '연결 코드가 올바르지 않습니다.')
+    if not password_matches(body.secret):
+        raise HTTPException(403, '서버 연결 비밀번호가 올바르지 않습니다. NAS의 웹 설정을 확인하세요.')
     token, ident = secrets.token_urlsafe(32), str(uuid.uuid4())
     execute('INSERT INTO devices VALUES(?,?,?,?)', (ident, body.name, hashlib.sha256(token.encode()).hexdigest(), time.time()))
     return {'id': ident, 'token': token}
